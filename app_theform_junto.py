@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, url_for, redirect
+from flask import Flask, jsonify, request
 
 app = Flask(__name__)
 
@@ -34,10 +34,9 @@ def theform():
                 '''
     else:
         name = request.form['name']
-        # location = request.form['location']
+        location = request.form['location']
     
-        # return f'<h1> Hello {name} você é de {location}. Você submeteu um formulário com sucesso!</h1>'
-        return redirect(url_for('home', name=name))
+        return f'<h1> Hello {name} você é de {location}. Você submeteu um formulário com sucesso!</h1>'
     
 # @app.route('/theform')
 # def theform():
