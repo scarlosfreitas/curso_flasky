@@ -1,25 +1,8 @@
-from flask import Flask, jsonify, request, url_for, redirect, session, render_template, g
-import sqlite3
+from flask import Flask, jsonify, request, url_for, redirect, session, render_templates
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = 'Thisisasecret!'
-
-def connect_db():
-    sql = sqlite3.connect('data.db')
-    # Trabalha com linhas ao inves de tuplas
-    sql.row_factory = sqlite3.Row
-    return sql
-
-def get_db():
-    if not hasattr(g, 'sqlite3'):
-        g.sqlite_db = connect_db()
-    return g.sqlite_db
-
-@app.teardown_appcontext
-def close_db(error):
-    if hasattr(g, 'sqlite3'):
-        g.sqlite_db.close()
 
 @app.route('/')
 def index():
@@ -30,8 +13,7 @@ def index():
 @app.route('/home/<string:name>', methods=['POST','GET'])
 def home(name):
     session['name'] = name
-
-    return render_template('home.html',name=name, display=True, mylist=['one','two','three'], listofdict=[{'name':'Zach'},{'name':'Zoe'}])
+    return f'<h1>Hello {name}, você está na home </h1>'
 
 @app.route('/json')
 def json():
@@ -52,13 +34,15 @@ def query():
 @app.route('/theform', methods=['GET','POST'])
 def theform():
     if request.method == 'GET':
-        return render_template('form.html')
+        return '''<form method="POST" action="/theform">
+                <input type="text" name="name">
+                <input type="text" name="location">
+                <input type="submit" value="Submit"> 
+                </form>
+                '''
     else:
         name = request.form['name']
         location = request.form['location']
-        
-        db = get_db()
-        db.execute('')
     
         # return f'<h1> Hello {name} você é de {location}. Você submeteu um formulário com sucesso!</h1>'
         
@@ -91,12 +75,5 @@ def processjson():
     
     return jsonify({'result':'Sucess', 'name': name, 'location': location, 'randomkeyinlist':randomlist[1]})
     
-@app.route('/viewresults')
-def viewresults():
-    db = get_db()
-    cur = db.execute('select id, name, location from users')
-    results = cur.fetchall()
-    return f"<h1>This ID is {results[0]['id']}. The name is {results[0]['name']}. the location is {results[0]['location']}.</h1>"
-
 if __name__ == '__main__':
     app.run()
